@@ -4,11 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/denisbrodbeck/machineid"
-
-	"github.com/marcusljx/ocbcctl/lib/vars"
-
 	"cloud.google.com/go/firestore"
+	"github.com/denisbrodbeck/machineid"
+	"github.com/marcusljx/ocbcctl/lib/vars"
 )
 
 func getSessionDocListener(sessionKey string) (*firestore.DocumentSnapshotIterator, error) {

@@ -15,5 +15,6 @@
 # vendor/
 
 bin/**
-.idea//**
+.env/**
+.idea/**
 .firebase/**

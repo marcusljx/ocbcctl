@@ -22,9 +22,42 @@ THE SOFTWARE.
 package main
 
 import (
+	"fmt"
+	"os"
+
+	"github.com/marcusljx/ocbcctl/lib/vars"
+
 	"github.com/marcusljx/ocbcctl/cmd"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func main() {
+	cobra.OnInitialize(initConfig)
 	cmd.Execute()
+}
+
+// initConfig reads in config file and ENV variables if set.
+func initConfig() {
+	viper.AddConfigPath(vars.ConfigDir)
+	viper.SetConfigType("yml")
+	viper.SetConfigName("config")
+
+	viper.SetDefault("callback_host", os.ExpandEnv("OCBCCTL_CALLBACK_HOST"))
+	viper.SetDefault("firebase_project_id", os.ExpandEnv("FIREBASE_PROJECT_ID"))
+	viper.SetDefault("firebase_collection_id", os.ExpandEnv("FIREBASE_COLLECTION_ID"))
+	viper.AutomaticEnv() // read in environment variables that match
+
+	// If a config file is found, read it in.
+	if err := viper.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			if writeErr := viper.SafeWriteConfig(); writeErr != nil {
+				fmt.Printf("error writing config: %v", writeErr)
+				os.Exit(2)
+			}
+		} else {
+			fmt.Printf("unable to read config: %v\n", err)
+			os.Exit(3)
+		}
+	}
 }

@@ -5,6 +5,6 @@ import (
 )
 
 var (
-	ErrNoLocalTokenContext      = errors.New("no local token context")
+	ErrNoLocalSessionFile       = errors.New("no local session found")
 	ErrUnrecognizedTokenContext = errors.New("unrecognized token context format")
 )

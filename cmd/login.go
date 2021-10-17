@@ -29,9 +29,10 @@ import (
 
 // loginCmd represents the login command
 var loginCmd = &cobra.Command{
-	Use:   "login",
-	Short: "Begins the login process (requires WebView)",
-	RunE:  login.RunE,
+	Use:          "login",
+	Short:        "Begins the login process (requires WebView)",
+	RunE:         login.RunE,
+	SilenceUsage: true,
 }
 
 func init() {

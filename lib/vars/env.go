@@ -1,11 +1,7 @@
 package vars
 
-import (
-	"os"
-)
-
 var (
-	CallbackHost          = os.Getenv("OCBCCTL_CALLBACK_HOST")
+	CallbackHost          string
 	FirestoreProjectID    string
 	FirestoreCollectionID string
 )

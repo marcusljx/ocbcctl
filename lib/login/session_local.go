@@ -22,15 +22,15 @@ func getSessionFile(sessionKey string) string {
 // lookupLocalSession retrieves the local session, if available
 func lookupLocalSession(sessionKey string) (*Session, error) {
 	fd, err := os.Open(getSessionFile(sessionKey))
+	if err != nil {
+		return nil, ErrNoLocalSessionFile
+	}
+
 	defer func() {
-		err := fd.Close()
-		if err != nil {
-			glog.Errorf("error while closing file descriptor: %v", err)
+		if closeErr := fd.Close(); closeErr != nil {
+			glog.Errorf("error while closing file descriptor: %v", closeErr)
 		}
 	}()
-	if err != nil {
-		return nil, ErrNoLocalTokenContext
-	}
 
 	data, err2 := ioutil.ReadAll(fd)
 	if err2 != nil {
