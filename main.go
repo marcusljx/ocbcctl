@@ -25,6 +25,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/golang/glog"
+
 	"github.com/marcusljx/ocbcctl/lib/vars"
 
 	"github.com/marcusljx/ocbcctl/cmd"
@@ -45,7 +47,7 @@ func initConfig() {
 
 	viper.SetDefault("callback_host", os.ExpandEnv("OCBCCTL_CALLBACK_HOST"))
 	viper.SetDefault("firebase_project_id", os.ExpandEnv("FIREBASE_PROJECT_ID"))
-	viper.SetDefault("firebase_collection_id", os.ExpandEnv("FIREBASE_COLLECTION_ID"))
+	viper.SetDefault("firestore_collection_id", os.ExpandEnv("FIRESTORE_COLLECTION_ID"))
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
@@ -60,4 +62,11 @@ func initConfig() {
 			os.Exit(3)
 		}
 	}
+	fmt.Printf("using config file at %s\n", viper.ConfigFileUsed())
+
+	if err := viper.Unmarshal(vars.DefaultConfig); err != nil {
+		fmt.Printf("unable to parse config: %v\n", err)
+		return
+	}
+	glog.Infof("firebase_project_id=%s", vars.DefaultConfig.FirebaseProjectID)
 }

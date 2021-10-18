@@ -10,28 +10,26 @@ import (
 
 	"github.com/golang/glog"
 
-	"github.com/denisbrodbeck/machineid"
-
 	"github.com/marcusljx/ocbcctl/lib/vars"
 )
 
 const (
-	ocbcAPIPath   = "ocbcapi"
 	authURLFormat = "https://api.ocbc.com/ocbcauthentication/api/oauth2/authorize?client_id=%s&redirect_uri=%s&scope=transactional"
 )
 
 func oauthFlow(sessionKey string) (*Session, error) {
-	iter, err := getSessionDocListener(sessionKey)
+	iter, cancel, err := getSessionDocListener(sessionKey)
 	if err != nil {
 		return nil, fmt.Errorf("error while starting session listener: %v", err)
 	}
 	defer iter.Stop()
+	defer cancel()
 
 	webviewURL, err2 := getOCBCAuthWebViewURL(sessionKey)
 	if err2 != nil {
 		return nil, fmt.Errorf("error computing OCBC Auth URL: %v", err2)
 	}
-	fmt.Printf("Visit this URL to login: %s", webviewURL)
+	fmt.Printf("Visit this URL to login: %s\n", webviewURL)
 
 	return waitForValidAccessSession(iter), nil
 }
@@ -77,23 +75,14 @@ func getOCBCAuthWebViewURL(sessionKey string) (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf(authURLFormat, vars.OCBCAPIClientID, callbackURL), nil
+	return fmt.Sprintf(authURLFormat, vars.DefaultConfig.OCBCAPIClientID, callbackURL), nil
 }
 
 func getCallbackURL(sessionKey string) (string, error) {
-	if vars.CallbackHost == "" {
-		return "", vars.ErrCallbackHostEnvNotSet
-	}
-
-	pid, hashErr := machineid.ProtectedID(sessionKey)
-	if hashErr != nil {
-		return "", fmt.Errorf("internal error: %v", hashErr)
-	}
-
-	u, err := url.Parse(path.Join(vars.CallbackHost, ocbcAPIPath, pid))
+	u, err := url.Parse(path.Join(vars.DefaultConfig.CallbackHost, sessionKey))
 	if err != nil {
 		return "", vars.ErrCallbackHostInvalidURL
 	}
 
-	return u.String(), nil
+	return url.QueryEscape(u.String()), nil
 }

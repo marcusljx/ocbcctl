@@ -34,14 +34,14 @@ func lookupLocalSession(sessionKey string) (*Session, error) {
 
 	data, err2 := ioutil.ReadAll(fd)
 	if err2 != nil {
-		glog.Errorf("error reading login context : %v")
+		glog.Errorf("error reading login context : %v", err2)
 		return nil, ErrUnrecognizedTokenContext
 	}
 
 	result := &Session{}
 
 	if err3 := json.Unmarshal(data, result); err3 != nil {
-		glog.Errorf("error reading login context : %v")
+		glog.Errorf("error reading login context : %v", err3)
 		return nil, ErrUnrecognizedTokenContext
 	}
 	return result, nil

@@ -27,9 +27,9 @@ func GetSession(sessionKey string) (*Session, error) {
 	if err != nil {
 		switch err {
 		case ErrNoLocalSessionFile:
-			fmt.Printf("no session found, starting login flow")
+			fmt.Println("no session found, starting login flow")
 		case ErrUnrecognizedTokenContext:
-			fmt.Printf("unable to recognize session contents, reattempting login")
+			fmt.Println("unable to recognize session, reattempting login")
 		}
 	}
 

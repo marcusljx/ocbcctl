@@ -3,25 +3,33 @@ package login
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"github.com/golang/glog"
 
 	"cloud.google.com/go/firestore"
-	"github.com/denisbrodbeck/machineid"
 	"github.com/marcusljx/ocbcctl/lib/vars"
 )
 
-func getSessionDocListener(sessionKey string) (*firestore.DocumentSnapshotIterator, error) {
-	ctx := context.Background()
-	firestoreClient, err := firestore.NewClient(ctx, vars.FirestoreProjectID)
+const (
+	docTimeout = 90 * time.Second
+)
+
+func getSessionDocListener(sessionKey string) (*firestore.DocumentSnapshotIterator, func(), error) {
+	ctx, cancel := context.WithTimeout(context.Background(), docTimeout)
+	glog.Infof("using project=%s", vars.DefaultConfig.FirebaseProjectID)
+	firestoreClient, err := firestore.NewClient(ctx, vars.DefaultConfig.FirebaseProjectID)
 	if err != nil {
-		return nil, fmt.Errorf("error initializing firestore client: %v", err)
+		return nil, cancel, fmt.Errorf("error initializing firestore client: %v", err)
 	}
 
-	collectionRef := firestoreClient.Collection(vars.FirestoreCollectionID)
-
-	pid, hashErr := machineid.ProtectedID(sessionKey)
-	if hashErr != nil {
-		return nil, fmt.Errorf("internal error: %v", hashErr)
+	closeFunc := func() {
+		cancel()
+		_ = firestoreClient.Close()
 	}
 
-	return collectionRef.Doc(pid).Snapshots(ctx), nil
+	glog.Infof("using collection=%s", vars.DefaultConfig.FirestoreCollectionID)
+	collectionRef := firestoreClient.Collection(vars.DefaultConfig.FirestoreCollectionID)
+
+	return collectionRef.Doc("userHash12345").Snapshots(ctx), closeFunc, nil
 }
